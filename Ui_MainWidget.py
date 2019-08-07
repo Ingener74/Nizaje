@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'res/MainWidget.ui',
 # licensing of 'res/MainWidget.ui' applies.
 #
-# Created: Tue Aug  6 15:36:54 2019
+# Created: Tue Aug  6 17:31:01 2019
 #      by: pyside2-uic  running on PySide2 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
@@ -74,6 +74,9 @@ class Ui_MainWidget(object):
         self.comboBoxModel = QtWidgets.QComboBox(MainWidget)
         self.comboBoxModel.setObjectName("comboBoxModel")
         self.verticalLayout_2.addWidget(self.comboBoxModel)
+        self.pushButtonModelInfo = QtWidgets.QPushButton(MainWidget)
+        self.pushButtonModelInfo.setObjectName("pushButtonModelInfo")
+        self.verticalLayout_2.addWidget(self.pushButtonModelInfo)
         spacerItem3 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_2.addItem(spacerItem3)
         self.horizontalLayout.addLayout(self.verticalLayout_2)
@@ -100,8 +103,9 @@ class Ui_MainWidget(object):
         self.pushButtonClear.setText(QtWidgets.QApplication.translate("MainWidget", "Clear", None, -1))
         self.pushButtonSelectFromDataSet.setText(QtWidgets.QApplication.translate("MainWidget", "Test image", None, -1))
         self.comboBoxModel.setToolTip(QtWidgets.QApplication.translate("MainWidget", "Select model", None, -1))
+        self.pushButtonModelInfo.setText(QtWidgets.QApplication.translate("MainWidget", "Info", None, -1))
         self.groupBox_2.setTitle(QtWidgets.QApplication.translate("MainWidget", "Output", None, -1))
 
-from DrawInput import DrawInput
 from HistogramWidget import HistogramWidget
+from DrawInput import DrawInput
 import resources_rc
