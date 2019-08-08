@@ -71,8 +71,8 @@ def download_dataset():
 
         m = 12500
 
-        train_set_count = 400
-        valid_set_count = 100
+        train_set_count = 2000
+        valid_set_count = 200
         test_set_count = 100
 
         c = 0
@@ -154,8 +154,8 @@ def download_dataset():
 
     history = model.fit_generator(
         train_generator, 
-        steps_per_epoch=20, 
-        epochs=10, 
+        steps_per_epoch=300, 
+        epochs=30, 
         validation_data=validation_generator,
         validation_steps=5)
 
