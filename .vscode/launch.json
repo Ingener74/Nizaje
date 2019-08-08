@@ -8,14 +8,16 @@
             "name": "App",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/main.py",
+            "program": "${workspaceFolder}/MnistClassifier/main.py",
+            "cwd": "${workspaceFolder}/MnistClassifier",
             "console": "integratedTerminal"
         },
         {
             "name": "Train",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/train.py",
+            "program": "${workspaceFolder}/MnistClassifier/train.py",
+            "cwd": "${workspaceFolder}/MnistClassifier",
             "console": "integratedTerminal"
         }
     ]
