@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "App",
+            "name": "Mnist",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/MnistClassifier/main.py",
@@ -13,11 +13,27 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "Train",
+            "name": "MnistTrainer",
             "type": "python",
             "request": "launch",
             "program": "${workspaceFolder}/MnistClassifier/train.py",
             "cwd": "${workspaceFolder}/MnistClassifier",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "CatVsDog",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/CatDogClassifier/main.py",
+            "cwd": "${workspaceFolder}/CatDogClassifier",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "CatAndDogTrainer",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/CatDogClassifier/train.py",
+            "cwd": "${workspaceFolder}/CatDogClassifier",
             "console": "integratedTerminal"
         }
     ]
