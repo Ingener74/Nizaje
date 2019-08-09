@@ -219,9 +219,9 @@ def plot_history(history):
     plt.show()
 
 def main():
-    # download_dataset()
+    download_dataset()
 
-    plot_history(json.load(open('log')))
+    # plot_history(json.load(open('log')))
 
 if __name__ == "__main__":
     main()
