@@ -71,9 +71,11 @@ def download_dataset():
 
         m = 12500
 
-        train_set_count = 2000
-        valid_set_count = 200
+        train_set_count = 11000
+        valid_set_count = 1400
         test_set_count = 100
+
+        assert(train_set_count + valid_set_count + test_set_count <= m)
 
         c = 0
 
@@ -140,7 +142,7 @@ def download_dataset():
     train_generator = train_data_generator.flow_from_directory(
         LOCAL_TRAIN_SET, 
         target_size=(150, 150), 
-        batch_size=20, 
+        batch_size=100, 
         class_mode='binary'
     )
 
@@ -148,14 +150,14 @@ def download_dataset():
     validation_generator = validation_data_generator.flow_from_directory(
         LOCAL_VALIDATION_SET,
         target_size=(150, 150),
-        batch_size=20,
+        batch_size=100,
         class_mode='binary'
     )
 
     history = model.fit_generator(
         train_generator, 
-        steps_per_epoch=300, 
-        epochs=30, 
+        steps_per_epoch=110, 
+        epochs=20, 
         validation_data=validation_generator,
         validation_steps=5)
 
@@ -191,9 +193,9 @@ def plot_history(history):
     plt.show()
 
 def main():
-    download_dataset()
+    # download_dataset()
 
-    # plot_history(json.load(open('log')))
+    plot_history(json.load(open('log')))
 
 if __name__ == "__main__":
     main()
