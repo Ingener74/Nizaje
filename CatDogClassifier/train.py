@@ -46,28 +46,42 @@ def download_dataset():
     LOCAL_VALIDATION_SET_DOG = os.path.join(LOCAL_VALIDATION_SET, DOG)
     LOCAL_TEST_SET_DOG = os.path.join(LOCAL_TEST_SET, DOG)
 
+    print('Make dataset dir...')
     if not os.path.exists(DATASET_PATH):
         os.makedirs(DATASET_PATH, exist_ok=True)
+    print('    Done')
 
+    print('Kaggle api...')
     api.authenticate()
+    print('    Done')
     if not os.path.exists(LOCAL_SAMPLE_CVS):
         api.competition_download_file(competition=COMPETITION, file_name=SAMPLE_CVS, path=DATASET_PATH)
+    print('    Done')
+    print('Download train.zip...')
     if not os.path.exists(LOCAL_TRAIN_ZIP):
         api.competition_download_file(competition=COMPETITION, file_name=TRAIN_ZIP, path=DATASET_PATH)
+    print('    Done')
+    print('Download test.zip...')
     if not os.path.exists(LOCAL_TEST_ZIP):
         api.competition_download_file(competition=COMPETITION, file_name=TEST_ZIP, path=DATASET_PATH)
+    print('    Done')
 
+    print('Extract train.zip...')
     if not os.path.exists(TRAIN_DIR):
         z = ZipFile(LOCAL_TRAIN_ZIP)
         z.extractall(DATASET_PATH)
+    print('    Done')
 
+    print('Prepare train dir...')
     if not os.path.exists(LOCAL_TRAIN_SET):
+        print('Make dirs for train...')
         os.makedirs(LOCAL_TRAIN_SET_CAT)
         os.makedirs(LOCAL_VALIDATION_SET_CAT)
         os.makedirs(LOCAL_TEST_SET_CAT)
         os.makedirs(LOCAL_TRAIN_SET_DOG)
         os.makedirs(LOCAL_VALIDATION_SET_DOG)
         os.makedirs(LOCAL_TEST_SET_DOG)
+        print('    Done')
 
         m = 12500
 
@@ -75,10 +89,13 @@ def download_dataset():
         valid_set_count = 1400
         test_set_count = 100
 
+        print('Check dataset sizes')
         assert(train_set_count + valid_set_count + test_set_count <= m)
+        print('    Done')
 
         c = 0
 
+        print('Copy images for train')
         for i in range(0, train_set_count):
             shutil.copyfile(
                 os.path.join(TRAIN_DIR, f'cat.{c + i}.jpg'),
@@ -88,9 +105,11 @@ def download_dataset():
                 os.path.join(TRAIN_DIR, f'dog.{c + i}.jpg'),
                 os.path.join(LOCAL_TRAIN_SET_DOG, f'dog.{c + i}.jpg')
             )
+        print('    Done')
 
         c += train_set_count
 
+        print('Copy images for validation')
         for i in range(0, valid_set_count):
             shutil.copyfile(
                 os.path.join(TRAIN_DIR, f'cat.{c + i}.jpg'),
@@ -100,9 +119,11 @@ def download_dataset():
                 os.path.join(TRAIN_DIR, f'dog.{i}.jpg'),
                 os.path.join(LOCAL_VALIDATION_SET_DOG, f'dog.{c + i}.jpg')
             )
+        print('    Done')
 
         c += valid_set_count
 
+        print('Copy images for test')
         for i in range(0, test_set_count):
             shutil.copyfile(
                 os.path.join(TRAIN_DIR, f'cat.{c + i}.jpg'),
@@ -112,15 +133,18 @@ def download_dataset():
                 os.path.join(TRAIN_DIR, f'dog.{c + i}.jpg'),
                 os.path.join(LOCAL_TEST_SET_DOG, f'dog.{c + i}.jpg')
             )
+        print('    Done')
 
         print('Files for Train ' + str(len(os.listdir(LOCAL_TRAIN_SET))))
         print('Files for Validation ' + str(len(os.listdir(LOCAL_VALIDATION_SET))))
         print('Files for Test ' + str(len(os.listdir(LOCAL_TEST_SET))))
+    print('    Done')
 
     if not os.path.exists(TEST_DIR):
         z = ZipFile(LOCAL_TEST_ZIP)
         z.extractall(DATASET_PATH)
 
+    print('Create model...')
     model = Sequential()
     model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)))
     model.add(MaxPooling2D((2, 2)))
@@ -135,6 +159,8 @@ def download_dataset():
     model.add(Dense(1, activation='sigmoid'))
 
     model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc'])
+
+    print('    Done')
 
     model.summary()
 
