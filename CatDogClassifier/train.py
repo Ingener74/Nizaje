@@ -6,6 +6,7 @@ import os
 import shutil
 from zipfile import ZipFile
 from pprint import pprint
+import click
 
 from kaggle import api
 from keras.layers import Conv2D, Dense, Flatten, MaxPooling2D
@@ -14,7 +15,7 @@ from keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 
 
-def download_dataset():
+def train():
     COMPETITION = 'dogs-vs-cats'
     DATASET_PATH = 'dataset'
     SAMPLE_CVS = 'sampleSubmission.csv'
@@ -218,10 +219,13 @@ def plot_history(history):
 
     plt.show()
 
-def main():
-    download_dataset()
-
-    # plot_history(json.load(open('log')))
-
+@click.command()
+@click.option('--plot/--no-plot', default=False)
+def main(plot):
+    if plot:
+        plot_history(json.load(open('log')))
+    else:
+        train()
+        
 if __name__ == "__main__":
     main()
