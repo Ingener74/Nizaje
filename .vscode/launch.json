@@ -35,6 +35,50 @@
             "program": "${workspaceFolder}/CatDogClassifier/train.py",
             "cwd": "${workspaceFolder}/CatDogClassifier",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "CatAndDogTrainer1",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/CatDogClassifier/train.py",
+            "args": ["train", "--plot_file", "log1", "--train_size", "10000", "--validation_size", "1000", "--epochs", "4", "--model", "1", "--model_name", "cat_dog_v1.h5"],
+            "cwd": "${workspaceFolder}/CatDogClassifier",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "CatAndDogTrainer2",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/CatDogClassifier/train.py",
+            "args": ["train", "--plot_file", "log2", "--train_size", "10000", "--validation_size", "1000", "--epochs", "4", "--model", "2", "--model_name", "cat_dog_v2.h5"],
+            "cwd": "${workspaceFolder}/CatDogClassifier",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "CatAndDogTrainer3",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/CatDogClassifier/train.py",
+            "args": ["train", "--plot_file", "log3", "--train_size", "10000", "--validation_size", "1000", "--epochs", "10", "--model", "3", "--model_name", "cat_dog_v3.h5"],
+            "cwd": "${workspaceFolder}/CatDogClassifier",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "CatAndDogTrainer4",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/CatDogClassifier/train.py",
+            "args": [
+                "train",
+                "--plot_file", "log4", 
+                "--train_size", "10000", 
+                "--validation_size", "1000", 
+                "--epochs", "30", 
+                "--model", "4", 
+                "--model_name", "cat_dog_v4.h5",
+                "--augment_data"],
+            "cwd": "${workspaceFolder}/CatDogClassifier",
+            "console": "integratedTerminal"
         }
     ]
 }

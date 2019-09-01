@@ -7,15 +7,124 @@ import shutil
 from zipfile import ZipFile
 from pprint import pprint
 import click
-
-from kaggle import api
-from keras.layers import Conv2D, Dense, Flatten, MaxPooling2D
-from keras.models import Sequential
-from keras.preprocessing.image import ImageDataGenerator
 import matplotlib.pyplot as plt
 
+def create_model(v):
+    from keras.layers import Conv2D, Dense, Flatten, MaxPooling2D, Dropout
+    from keras.models import Sequential
+    from keras.applications import VGG16
 
-def train():
+    assert v > 0 and v < 6
+    print(f'Selected model: {v}')
+    if v == 1:
+        model = Sequential()
+        model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Conv2D(64, (3, 3), activation='relu'))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Conv2D(128, (3, 3), activation='relu'))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Conv2D(128, (3, 3), activation='relu'))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Flatten())
+        model.add(Dense(512, activation='relu'))
+        model.add(Dense(1, activation='sigmoid'))
+
+        model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc'])
+
+    elif v == 2:
+        model = Sequential()
+        model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)))
+        model.add(Dropout(0.3))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Conv2D(64, (3, 3), activation='relu'))
+        model.add(Dropout(0.3))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Conv2D(128, (3, 3), activation='relu'))
+        model.add(Dropout(0.3))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Conv2D(128, (3, 3), activation='relu'))
+        model.add(Dropout(0.3))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Flatten())
+        model.add(Dense(512, activation='relu'))
+        model.add(Dense(1, activation='sigmoid'))
+
+        model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc'])
+    elif v == 3:
+        model = Sequential()
+        model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)))
+        model.add(Dropout(0.5))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Conv2D(64, (3, 3), activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Conv2D(128, (3, 3), activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Conv2D(128, (3, 3), activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Flatten())
+        model.add(Dense(512, activation='relu'))
+        model.add(Dropout(0.5))
+        model.add(Dense(1, activation='sigmoid'))
+
+        model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc'])
+
+    elif v == 4:
+        model = Sequential()
+        model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Conv2D(64, (3, 3), activation='relu'))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Conv2D(128, (3, 3), activation='relu'))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Conv2D(128, (3, 3), activation='relu'))
+        model.add(MaxPooling2D((2, 2)))
+        model.add(Flatten())
+        model.add(Dropout(0.5))
+        model.add(Dense(512, activation='relu'))
+        model.add(Dense(1, activation='sigmoid'))
+
+        model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc'])
+
+    elif v == 5:
+        print('Use transfer learning with VGG16 ImageNet weights base')
+
+        conv = VGG16(weights='imagenet', include_top=False, input_shape=(150, 150, 3))
+        conv.summary()
+        return None
+
+        # model = Sequential()
+        # model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)))
+        # model.add(MaxPooling2D((2, 2)))
+        # model.add(Conv2D(64, (3, 3), activation='relu'))
+        # model.add(MaxPooling2D((2, 2)))
+        # model.add(Conv2D(128, (3, 3), activation='relu'))
+        # model.add(MaxPooling2D((2, 2)))
+        # model.add(Conv2D(128, (3, 3), activation='relu'))
+        # model.add(MaxPooling2D((2, 2)))
+        # model.add(Flatten())
+        # model.add(Dropout(0.5))
+        # model.add(Dense(512, activation='relu'))
+        # model.add(Dense(1, activation='sigmoid'))
+
+        # model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc'])
+
+    model.summary()
+    return model
+
+
+def train(log_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model_version, model_name, augment_data):
+    from kaggle import api
+    from keras.preprocessing.image import ImageDataGenerator
+
+    print(f'Train size:      {train_size}')
+    print(f'Validation size: {validation_size}')
+    print(f'Test size:       {test_size}')
+    print(f'Batch:           {batch}')
+    print(f'Epochs:          {epochs}')
     COMPETITION = 'dogs-vs-cats'
     DATASET_PATH = 'dataset'
     SAMPLE_CVS = 'sampleSubmission.csv'
@@ -73,6 +182,9 @@ def train():
         z.extractall(DATASET_PATH)
     print('    Done')
 
+    ########################
+    # Check files for training
+    ########################
     print('Prepare train dir...')
     if not os.path.exists(LOCAL_TRAIN_SET):
         print('Make dirs for train...')
@@ -86,13 +198,15 @@ def train():
 
         m = 12500
 
-        train_set_count = 11000
-        valid_set_count = 1400
-        test_set_count = 100
+        train_set_count = train_size #11000
+        valid_set_count = validation_size # 1400
+        test_set_count = test_size # 100
 
         print('Check dataset sizes')
         assert(train_set_count + valid_set_count + test_set_count <= m)
         print('    Done')
+
+        print(f'Train + Validation + Test = {train_size + validation_size + test_size} < {m}')
 
         c = 0
 
@@ -146,58 +260,62 @@ def train():
         z.extractall(DATASET_PATH)
 
     print('Create model...')
-    model = Sequential()
-    model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Conv2D(64, (3, 3), activation='relu'))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Conv2D(128, (3, 3), activation='relu'))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Conv2D(128, (3, 3), activation='relu'))
-    model.add(MaxPooling2D((2, 2)))
-    model.add(Flatten())
-    model.add(Dense(512, activation='relu'))
-    model.add(Dense(1, activation='sigmoid'))
 
-    model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc'])
+    model = create_model(model_version)
 
     print('    Done')
 
-    model.summary()
-
-    train_data_generator = ImageDataGenerator(rescale=1./255)
+    augment_config = {
+        'rotation_range': 40,
+        'width_shift_range': 0.2,
+        'height_shift_range': 0.2,
+        'shear_range': 0.2,
+        'zoom_range': 0.2,
+        'horizontal_flip': True,
+        'fill_mode': 'nearest'
+    } if augment_data else {}
+    
+    train_data_generator = ImageDataGenerator(
+        rescale=1./255,
+        **augment_config
+    )
     train_generator = train_data_generator.flow_from_directory(
         LOCAL_TRAIN_SET, 
         target_size=(150, 150), 
-        batch_size=100, 
+        batch_size=batch,
         class_mode='binary'
     )
 
     validation_data_generator = ImageDataGenerator(rescale=1./255)
+
     validation_generator = validation_data_generator.flow_from_directory(
         LOCAL_VALIDATION_SET,
         target_size=(150, 150),
-        batch_size=100,
+        batch_size=batch,
         class_mode='binary'
     )
 
+    print(f'Steps per epoch for training:   {train_size / batch}')
+    print(f'Steps per epoch for validation: {validation_size / batch}')
+
     history = model.fit_generator(
         train_generator, 
-        steps_per_epoch=110, 
-        epochs=20, 
+        steps_per_epoch=train_size / batch,
+        epochs=epochs, 
         validation_data=validation_generator,
-        validation_steps=5)
+        validation_steps=validation_size / batch)
 
-    with open('log', 'w') as f:
+    with open(log_file, 'w') as f:
         json.dump(history.history, f, indent=4, separators=(',', ':'))
     
     pprint(history.history)
 
-    plot_history(history.history)
+    if train_with_plot:
+        plot_history(history.history)
 
-    model.save('cat_dog.h5')
+    model.save(model_name)
 
-def plot_history(history):
+def plot_history(history, plot_file):
     acc = history['acc']
     loss = history['loss']
     val_acc = history['val_acc']
@@ -217,15 +335,42 @@ def plot_history(history):
     plt.legend()
     plt.grid(True)
 
-    plt.show()
+    plt.savefig(plot_file + '.png')
+
+    # plt.show()
+
+@click.group()
+def cli():
+    pass
 
 @click.command()
-@click.option('--plot/--no-plot', default=False)
-def main(plot):
-    if plot:
-        plot_history(json.load(open('log')))
-    else:
-        train()
-        
+@click.option('--plot_file', type=str, default='log')
+@click.option('--train_with_plot/--no-train_with_plot', default=False)
+@click.option('--train_size', default=400)
+@click.option('--validation_size', default=100)
+@click.option('--test_size', default=200)
+@click.option('--batch', default=100)
+@click.option('--epochs', default=10)
+@click.option('--model', default=1, help='1, 2, ...')
+@click.option('--model_name', type=str, default='cat_dog.h5')
+@click.option('--augment_data/--no-augment_data', default=False)
+def train(plot_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model, model_name, augment_data):
+    train(plot_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model, model_name, augment_data)
+
+@click.command()
+@click.option('--plot_file', type=str, default='log')
+def plot(plot_file):
+    plot_history(json.load(open(plot_file)), plot_file)
+
+
+@click.command()
+@click.option('--model', type=int)
+def create(model):
+    create_model(model)
+
+cli.add_command(train)
+cli.add_command(plot)
+cli.add_command(create)
+
 if __name__ == "__main__":
-    main()
+    cli()
