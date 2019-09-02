@@ -116,7 +116,7 @@ def create_model(v):
     return model
 
 
-def train(log_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model_version, model_name, augment_data):
+def train_internal(log_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model_version, model_name, augment_data):
     from kaggle import api
     from keras.preprocessing.image import ImageDataGenerator
 
@@ -355,7 +355,7 @@ def cli():
 @click.option('--model_name', type=str, default='cat_dog.h5')
 @click.option('--augment_data/--no-augment_data', default=False)
 def train(plot_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model, model_name, augment_data):
-    train(plot_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model, model_name, augment_data)
+    train_internal(plot_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model, model_name, augment_data)
 
 @click.command()
 @click.option('--plot_file', type=str, default='log')
