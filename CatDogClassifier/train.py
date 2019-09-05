@@ -305,15 +305,16 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
         validation_data=validation_generator,
         validation_steps=validation_size / batch)
 
+    model.save(model_name)
+
     with open(log_file, 'w') as f:
         json.dump(history.history, f, indent=4, separators=(',', ':'))
     
     pprint(history.history)
 
     if train_with_plot:
-        plot_history(history.history)
+        plot_history(history.history, log_file)
 
-    model.save(model_name)
 
 def plot_history(history, plot_file):
     acc = history['acc']
