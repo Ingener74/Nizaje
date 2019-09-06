@@ -192,30 +192,52 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
     ########################
     # Check files for training
     ########################
-    print('Prepare train dir...')
-    if not os.path.exists(LOCAL_TRAIN_SET):
-        print('Make dirs for train...')
-        os.makedirs(LOCAL_TRAIN_SET_CAT)
-        os.makedirs(LOCAL_VALIDATION_SET_CAT)
-        os.makedirs(LOCAL_TEST_SET_CAT)
-        os.makedirs(LOCAL_TRAIN_SET_DOG)
-        os.makedirs(LOCAL_VALIDATION_SET_DOG)
-        os.makedirs(LOCAL_TEST_SET_DOG)
-        print('    Done')
 
-        m = 12500
+    def check_and_make_dirs(dir_name):
+        print(f'Prepare {dir_name} dir...')
+        if not os.path.exist(dir_name):
+            os.makedirs(dir_name)
+            print('    Done')
 
-        train_set_count = train_size #11000
-        valid_set_count = validation_size # 1400
-        test_set_count = test_size # 100
+    check_and_make_dirs(LOCAL_TRAIN_SET)
 
-        print('Check dataset sizes')
-        assert(train_set_count + valid_set_count + test_set_count <= m)
-        print('    Done')
+    check_and_make_dirs(LOCAL_TRAIN_SET_CAT)
+    check_and_make_dirs(LOCAL_VALIDATION_SET_CAT)
+    check_and_make_dirs(LOCAL_TEST_SET_CAT)
+    
+    check_and_make_dirs(LOCAL_TRAIN_SET_DOG)
+    check_and_make_dirs(LOCAL_VALIDATION_SET_DOG)
+    check_and_make_dirs(LOCAL_TEST_SET_DOG)
 
-        print(f'Train + Validation + Test = {train_size + validation_size + test_size} < {m}')
+    # print('Prepare train dir...')
+    # if not os.path.exists(LOCAL_TRAIN_SET):
 
-        c = 0
+    #     os.makedirs(LOCAL_TRAIN_SET)
+    #     print('    Done')
+    
+    # if not os.path.exists():
+    #     print('Make dirs for train...')
+    #     os.makedirs(LOCAL_TRAIN_SET_CAT)
+    #     os.makedirs(LOCAL_VALIDATION_SET_CAT)
+    #     os.makedirs(LOCAL_TEST_SET_CAT)
+    #     os.makedirs(LOCAL_TRAIN_SET_DOG)
+    #     os.makedirs(LOCAL_VALIDATION_SET_DOG)
+    #     os.makedirs(LOCAL_TEST_SET_DOG)
+    #     print('    Done')
+
+    m = 12500
+
+    train_set_count = train_size
+    valid_set_count = validation_size
+    test_set_count = test_size
+
+    print('Check dataset sizes')
+    assert(train_set_count + valid_set_count + test_set_count <= m)
+    print('    Done')
+
+    print(f'Train + Validation + Test = {train_size + validation_size + test_size} < {m}')
+
+    c = 0
 
         print('Copy images for train')
         for i in range(0, train_set_count):

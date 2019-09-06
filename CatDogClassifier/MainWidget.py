@@ -24,6 +24,7 @@ class MainWidget(QWidget):
         self.look_for_models()
 
         self.ui.pushButtonOpen.clicked.connect(self.open_image)
+        self.ui.comboBoxModel.currentIndexChanged.connect(self.model_changed)
 
     def look_for_models(self):
         for root, dirs, files in os.walk('.'):
@@ -35,6 +36,10 @@ class MainWidget(QWidget):
             self.ui.comboBoxModel.setCurrentIndex(0)
             self.ai = self.load_model(self.ui.comboBoxModel.itemText(0))
             self.ai.summary()
+
+    def model_changed(self, index):
+        self.ai = self.load_model(self.ui.comboBoxModel.itemText(index))
+        self.ai.summary()
 
     def load_model(self, model_name):
         return load_model(model_name)
