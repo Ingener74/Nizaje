@@ -13,6 +13,7 @@ def create_model(v):
     from keras.layers import Conv2D, Dense, Flatten, MaxPooling2D, Dropout
     from keras.models import Sequential
     from keras.applications import VGG16
+    from keras.optimizers import RMSprop
 
     assert v > 0 and v < 6
     print(f'Selected model: {v}')
@@ -93,31 +94,27 @@ def create_model(v):
         print('Use transfer learning with VGG16 ImageNet weights base')
 
         conv = VGG16(weights='imagenet', include_top=False, input_shape=(150, 150, 3))
-        conv.summary()
 
         # conv.training = False
         conv.trainable = False
 
-        # for layer in conv.layers:
-        #     print(layer.name)
+        set_train = False
+        for layer in conv.layers:
+            if layer.name == 'block5_conv1':
+                set_train = True
+            layer.trainable = set_train
+            
+        model = Sequential()
+        model.add(conv)
+        model.add(Flatten())
+        model.add(Dense(512, activation='relu'))
+        model.add(Dense(1, activation='sigmoid'))
 
-        return None
+        # model.summary()
+        # for layer in model.layers:
+        #     print(f'{layer.name} is trainable {"+" if layer.trainable else "-"}')
 
-        # model = Sequential()
-        # model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)))
-        # model.add(MaxPooling2D((2, 2)))
-        # model.add(Conv2D(64, (3, 3), activation='relu'))
-        # model.add(MaxPooling2D((2, 2)))
-        # model.add(Conv2D(128, (3, 3), activation='relu'))
-        # model.add(MaxPooling2D((2, 2)))
-        # model.add(Conv2D(128, (3, 3), activation='relu'))
-        # model.add(MaxPooling2D((2, 2)))
-        # model.add(Flatten())
-        # model.add(Dropout(0.5))
-        # model.add(Dense(512, activation='relu'))
-        # model.add(Dense(1, activation='sigmoid'))
-
-        # model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc'])
+        model.compile(loss='binary_crossentropy', optimizer=RMSprop(lr=1e-5), metrics=['acc'])
 
     model.summary()
     return model
@@ -195,35 +192,26 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
 
     def check_and_make_dirs(dir_name):
         print(f'Prepare {dir_name} dir...')
-        if not os.path.exist(dir_name):
+        if not os.path.exists(dir_name):
             os.makedirs(dir_name)
             print('    Done')
 
     check_and_make_dirs(LOCAL_TRAIN_SET)
 
-    check_and_make_dirs(LOCAL_TRAIN_SET_CAT)
-    check_and_make_dirs(LOCAL_VALIDATION_SET_CAT)
-    check_and_make_dirs(LOCAL_TEST_SET_CAT)
+    if os.path.exists(LOCAL_TRAIN_SET):
+        shutil.rmtree(LOCAL_TRAIN_SET)
+    if os.path.exists(LOCAL_VALIDATION_SET):
+        shutil.rmtree(LOCAL_VALIDATION_SET)
+    if os.path.exists(LOCAL_TEST_SET):
+        shutil.rmtree(LOCAL_TEST_SET)
     
-    check_and_make_dirs(LOCAL_TRAIN_SET_DOG)
-    check_and_make_dirs(LOCAL_VALIDATION_SET_DOG)
-    check_and_make_dirs(LOCAL_TEST_SET_DOG)
-
-    # print('Prepare train dir...')
-    # if not os.path.exists(LOCAL_TRAIN_SET):
-
-    #     os.makedirs(LOCAL_TRAIN_SET)
-    #     print('    Done')
-    
-    # if not os.path.exists():
-    #     print('Make dirs for train...')
-    #     os.makedirs(LOCAL_TRAIN_SET_CAT)
-    #     os.makedirs(LOCAL_VALIDATION_SET_CAT)
-    #     os.makedirs(LOCAL_TEST_SET_CAT)
-    #     os.makedirs(LOCAL_TRAIN_SET_DOG)
-    #     os.makedirs(LOCAL_VALIDATION_SET_DOG)
-    #     os.makedirs(LOCAL_TEST_SET_DOG)
-    #     print('    Done')
+    os.makedirs(LOCAL_TRAIN_SET)
+    os.makedirs(LOCAL_TRAIN_SET_CAT)
+    os.makedirs(LOCAL_TRAIN_SET_DOG)
+    os.makedirs(LOCAL_VALIDATION_SET_CAT)
+    os.makedirs(LOCAL_VALIDATION_SET_DOG)
+    os.makedirs(LOCAL_TEST_SET_CAT)
+    os.makedirs(LOCAL_TEST_SET_DOG)
 
     m = 12500
 
@@ -239,49 +227,50 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
 
     c = 0
 
-        print('Copy images for train')
-        for i in range(0, train_set_count):
-            shutil.copyfile(
-                os.path.join(TRAIN_DIR, f'cat.{c + i}.jpg'),
-                os.path.join(LOCAL_TRAIN_SET_CAT, f'cat.{c + i}.jpg')
-            )
-            shutil.copyfile(
-                os.path.join(TRAIN_DIR, f'dog.{c + i}.jpg'),
-                os.path.join(LOCAL_TRAIN_SET_DOG, f'dog.{c + i}.jpg')
-            )
-        print('    Done')
+    print('Copy images for train')
+    for i in range(0, train_set_count):
+        shutil.copyfile(
+            os.path.join(TRAIN_DIR, f'cat.{c + i}.jpg'),
+            os.path.join(LOCAL_TRAIN_SET_CAT, f'cat.{c + i}.jpg')
+        )
+        shutil.copyfile(
+            os.path.join(TRAIN_DIR, f'dog.{c + i}.jpg'),
+            os.path.join(LOCAL_TRAIN_SET_DOG, f'dog.{c + i}.jpg')
+        )
+    print('    Done')
 
-        c += train_set_count
+    c += train_set_count
 
-        print('Copy images for validation')
-        for i in range(0, valid_set_count):
-            shutil.copyfile(
-                os.path.join(TRAIN_DIR, f'cat.{c + i}.jpg'),
-                os.path.join(LOCAL_VALIDATION_SET_CAT, f'cat.{c + i}.jpg')
-            )
-            shutil.copyfile(
-                os.path.join(TRAIN_DIR, f'dog.{i}.jpg'),
-                os.path.join(LOCAL_VALIDATION_SET_DOG, f'dog.{c + i}.jpg')
-            )
-        print('    Done')
+    print('Copy images for validation')
+    for i in range(0, valid_set_count):
+        shutil.copyfile(
+            os.path.join(TRAIN_DIR, f'cat.{c + i}.jpg'),
+            os.path.join(LOCAL_VALIDATION_SET_CAT, f'cat.{c + i}.jpg')
+        )
+        shutil.copyfile(
+            os.path.join(TRAIN_DIR, f'dog.{i}.jpg'),
+            os.path.join(LOCAL_VALIDATION_SET_DOG, f'dog.{c + i}.jpg')
+        )
+    print('    Done')
 
-        c += valid_set_count
+    c += valid_set_count
 
-        print('Copy images for test')
-        for i in range(0, test_set_count):
-            shutil.copyfile(
-                os.path.join(TRAIN_DIR, f'cat.{c + i}.jpg'),
-                os.path.join(LOCAL_TEST_SET_CAT, f'cat.{c + i}.jpg')
-            )
-            shutil.copyfile(
-                os.path.join(TRAIN_DIR, f'dog.{c + i}.jpg'),
-                os.path.join(LOCAL_TEST_SET_DOG, f'dog.{c + i}.jpg')
-            )
-        print('    Done')
+    print('Copy images for test')
+    for i in range(0, test_set_count):
+        shutil.copyfile(
+            os.path.join(TRAIN_DIR, f'cat.{c + i}.jpg'),
+            os.path.join(LOCAL_TEST_SET_CAT, f'cat.{c + i}.jpg')
+        )
+        shutil.copyfile(
+            os.path.join(TRAIN_DIR, f'dog.{c + i}.jpg'),
+            os.path.join(LOCAL_TEST_SET_DOG, f'dog.{c + i}.jpg')
+        )
+    print('    Done')
 
-        print('Files for Train ' + str(len(os.listdir(LOCAL_TRAIN_SET))))
-        print('Files for Validation ' + str(len(os.listdir(LOCAL_VALIDATION_SET))))
-        print('Files for Test ' + str(len(os.listdir(LOCAL_TEST_SET))))
+    print('Files for Train ' + str(len(os.listdir(LOCAL_TRAIN_SET_CAT)) + len(os.listdir(LOCAL_TRAIN_SET_DOG))))
+    print('Files for Validation ' + str(len(os.listdir(LOCAL_VALIDATION_SET_CAT)) + len(os.listdir(LOCAL_VALIDATION_SET_DOG))))
+    print('Files for Test ' + str(len(os.listdir(LOCAL_TEST_SET_CAT)) + len(os.listdir(LOCAL_TEST_SET_DOG))))
+    
     print('    Done')
 
     if not os.path.exists(TEST_DIR):

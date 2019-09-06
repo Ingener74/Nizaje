@@ -79,6 +79,35 @@
                 "--augment_data"],
             "cwd": "${workspaceFolder}/CatDogClassifier",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "CatAndDogTrainer5",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/CatDogClassifier/train.py",
+            "args": [
+                "train",
+                "--plot_file", "log5", 
+                "--train_size", "10000", 
+                "--validation_size", "1000", 
+                "--epochs", "30", 
+                "--model", "5", 
+                "--model_name", "cat_dog_v5.h5",
+                "--augment_data"],
+            "cwd": "${workspaceFolder}/CatDogClassifier",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "CatAndDog_CreateModel5",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/CatDogClassifier/train.py",
+            "args": [
+                "create",
+                "5"
+            ],
+            "cwd": "${workspaceFolder}/CatDogClassifier",
+            "console": "integratedTerminal"
         }
     ]
 }
