@@ -94,6 +94,13 @@ def create_model(v):
 
         conv = VGG16(weights='imagenet', include_top=False, input_shape=(150, 150, 3))
         conv.summary()
+
+        # conv.training = False
+        conv.trainable = False
+
+        # for layer in conv.layers:
+        #     print(layer.name)
+
         return None
 
         # model = Sequential()
@@ -365,7 +372,7 @@ def plot(plot_file):
 
 
 @click.command()
-@click.option('--model', type=int)
+@click.argument('model', type=int)
 def create(model):
     create_model(model)
 
