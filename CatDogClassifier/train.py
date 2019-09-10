@@ -95,7 +95,6 @@ def create_model(v):
 
         conv = VGG16(weights='imagenet', include_top=False, input_shape=(150, 150, 3))
 
-        # conv.training = False
         conv.trainable = False
 
         set_train = False
@@ -110,9 +109,11 @@ def create_model(v):
         model.add(Dense(512, activation='relu'))
         model.add(Dense(1, activation='sigmoid'))
 
+        conv.summary()
+
         # model.summary()
-        # for layer in model.layers:
-        #     print(f'{layer.name} is trainable {"+" if layer.trainable else "-"}')
+        for layer in conv.layers:
+            print(f'{layer.name} is trainable {"+" if layer.trainable else "-"}')
 
         model.compile(loss='binary_crossentropy', optimizer=RMSprop(lr=1e-5), metrics=['acc'])
 
