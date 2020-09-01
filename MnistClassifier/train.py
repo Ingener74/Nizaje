@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from json import load
-
-import numpy as np
 import matplotlib.pyplot as plt
 from keras.datasets import mnist
 from keras.layers import Conv2D, Dense, MaxPooling2D, Flatten
 from keras.models import Sequential, load_model
 from keras.utils import to_categorical
+
 
 def train_network():
     # Prepare dataset
@@ -38,7 +36,7 @@ def train_network():
     # Create model
     network = Sequential()
 
-    network.add(Dense(512, activation='relu', input_shape=(train_images.shape[1], )))
+    network.add(Dense(512, activation='relu', input_shape=(train_images.shape[1],)))
     network.add(Dense(10, activation='softmax'))
 
     network.summary()
@@ -55,6 +53,7 @@ def train_network():
     # Save model
     # network.save('model_dense.h5')
     return network
+
 
 def train_conv_network():
     # Prepare dataset
@@ -115,8 +114,10 @@ def train_conv_network():
 
     return network
 
+
 def load_network():
     return load_model(MODEL_FILE)
+
 
 # network = train_network()
 

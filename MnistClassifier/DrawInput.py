@@ -2,10 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from keras.datasets import mnist
-from PySide2.QtCore import Qt, QPoint, Signal, Slot
-from PySide2.QtGui import QPainter, QBrush, QColor, QMouseEvent, QContextMenuEvent
-from PySide2.QtWidgets import QWidget, QMenu, QAction
+from PySide2.QtCore import Qt, QPoint, Signal
+from PySide2.QtGui import QPainter, QBrush, QColor, QMouseEvent
+from PySide2.QtWidgets import QWidget
 
 
 class DrawInput(QWidget):
@@ -55,14 +54,13 @@ class DrawInput(QWidget):
             self.draw(event.pos())
 
     def mouseMoveEvent(self, event: QMouseEvent):
-        if event.button() == Qt.LeftButton:
-            self.draw(event.pos())
+        self.draw(event.pos())
 
     def draw(self, pos: QPoint):
         y = int(pos.y() / self.cell_size[0])
         x = int(pos.x() / self.cell_size[1])
-        assert(y >= 0 and y < self.cell_count[0])
-        assert(x >= 0 and x < self.cell_count[1])
+        assert (0 <= y < self.cell_count[0])
+        assert (0 <= x < self.cell_count[1])
         self.data[y, x] = 1.0
         self.repaint()
         self.input_changed.emit(self.data)

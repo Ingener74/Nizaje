@@ -2,16 +2,15 @@
 # -*- coding: utf-8 -*-
 
 import os
-from PySide2.QtCore import Qt
-from PySide2.QtWidgets import QWidget, QFileDialog
-from PySide2.QtGui import QKeyEvent, QPixmap
 
 import numpy as np
 from PIL import Image
-from scipy import ndimage
+from PySide2.QtCore import Qt
+from PySide2.QtGui import QKeyEvent, QPixmap
+from PySide2.QtWidgets import QWidget, QFileDialog
+from Ui_MainWidget import Ui_MainWidget
 from keras.models import load_model, Model
 
-from Ui_MainWidget import Ui_MainWidget
 
 class MainWidget(QWidget):
     def __init__(self, parent=None):
@@ -31,7 +30,7 @@ class MainWidget(QWidget):
             for file_name in files:
                 if file_name.endswith('.h5'):
                     self.ui.comboBoxModel.addItem(file_name)
-        
+
         if self.ui.comboBoxModel.count() > 0:
             self.ui.comboBoxModel.setCurrentIndex(0)
             self.ai = self.load_model(self.ui.comboBoxModel.itemText(0))
@@ -46,12 +45,14 @@ class MainWidget(QWidget):
 
     def open_image(self):
         image_file_name, filters = QFileDialog.getOpenFileName(None, 'Open image file')
+        if image_file_name == '':
+            return
         self.ui.labelInputImage.setPixmap(QPixmap(image_file_name))
         cat = Image.open(image_file_name)
         cat = cat.resize((150, 150))
         cat = np.asarray(cat)
         if cat.shape[2] == 4:
-            cat = cat[:,:,:-1]
+            cat = cat[:, :, :-1]
         cat = cat.reshape((1, cat.shape[0], cat.shape[1], cat.shape[2]))
         if self.ai is not None:
             output = self.ai.predict(cat)

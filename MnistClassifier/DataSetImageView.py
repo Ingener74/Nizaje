@@ -4,8 +4,6 @@
 import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvas
 from matplotlib.figure import Figure
-from PySide2.QtGui import QPainter
-from PySide2.QtWidgets import QWidget
 
 
 class DataSetImageView(FigureCanvas):
@@ -24,7 +22,6 @@ class DataSetImageView(FigureCanvas):
         self.setParent(parent)
 
     def set_data(self, data: np.ndarray):
-
         self.figure.clf()
         self.axis = self.figure.add_subplot(111)
         self.axis.imshow(data)

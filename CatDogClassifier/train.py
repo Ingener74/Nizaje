@@ -9,13 +9,14 @@ from pprint import pprint
 import click
 import matplotlib.pyplot as plt
 
+
 def create_model(v):
     from keras.layers import Conv2D, Dense, Flatten, MaxPooling2D, Dropout
     from keras.models import Sequential
     from keras.applications import VGG16
     from keras.optimizers import RMSprop
 
-    assert v > 0 and v < 6
+    assert 0 < v < 6
     print(f'Selected model: {v}')
     if v == 1:
         model = Sequential()
@@ -102,7 +103,7 @@ def create_model(v):
             if layer.name == 'block5_conv1':
                 set_train = True
             layer.trainable = set_train
-            
+
         model = Sequential()
         model.add(conv)
         model.add(Flatten())
@@ -121,7 +122,8 @@ def create_model(v):
     return model
 
 
-def train_internal(log_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model_version, model_name, augment_data):
+def train_internal(log_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model_version,
+                   model_name, augment_data):
     from kaggle import api
     from keras.preprocessing.image import ImageDataGenerator
 
@@ -205,7 +207,7 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
         shutil.rmtree(LOCAL_VALIDATION_SET)
     if os.path.exists(LOCAL_TEST_SET):
         shutil.rmtree(LOCAL_TEST_SET)
-    
+
     os.makedirs(LOCAL_TRAIN_SET)
     os.makedirs(LOCAL_TRAIN_SET_CAT)
     os.makedirs(LOCAL_TRAIN_SET_DOG)
@@ -221,7 +223,7 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
     test_set_count = test_size
 
     print('Check dataset sizes')
-    assert(train_set_count + valid_set_count + test_set_count <= m)
+    assert (train_set_count + valid_set_count + test_set_count <= m)
     print('    Done')
 
     print(f'Train + Validation + Test = {train_size + validation_size + test_size} < {m}')
@@ -269,9 +271,10 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
     print('    Done')
 
     print('Files for Train ' + str(len(os.listdir(LOCAL_TRAIN_SET_CAT)) + len(os.listdir(LOCAL_TRAIN_SET_DOG))))
-    print('Files for Validation ' + str(len(os.listdir(LOCAL_VALIDATION_SET_CAT)) + len(os.listdir(LOCAL_VALIDATION_SET_DOG))))
+    print('Files for Validation ' + str(
+        len(os.listdir(LOCAL_VALIDATION_SET_CAT)) + len(os.listdir(LOCAL_VALIDATION_SET_DOG))))
     print('Files for Test ' + str(len(os.listdir(LOCAL_TEST_SET_CAT)) + len(os.listdir(LOCAL_TEST_SET_DOG))))
-    
+
     print('    Done')
 
     if not os.path.exists(TEST_DIR):
@@ -293,19 +296,19 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
         'horizontal_flip': True,
         'fill_mode': 'nearest'
     } if augment_data else {}
-    
+
     train_data_generator = ImageDataGenerator(
-        rescale=1./255,
+        rescale=1. / 255,
         **augment_config
     )
     train_generator = train_data_generator.flow_from_directory(
-        LOCAL_TRAIN_SET, 
-        target_size=(150, 150), 
+        LOCAL_TRAIN_SET,
+        target_size=(150, 150),
         batch_size=batch,
         class_mode='binary'
     )
 
-    validation_data_generator = ImageDataGenerator(rescale=1./255)
+    validation_data_generator = ImageDataGenerator(rescale=1. / 255)
 
     validation_generator = validation_data_generator.flow_from_directory(
         LOCAL_VALIDATION_SET,
@@ -318,9 +321,9 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
     print(f'Steps per epoch for validation: {validation_size / batch}')
 
     history = model.fit_generator(
-        train_generator, 
+        train_generator,
         steps_per_epoch=train_size / batch,
-        epochs=epochs, 
+        epochs=epochs,
         validation_data=validation_generator,
         validation_steps=validation_size / batch)
 
@@ -328,7 +331,7 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
 
     with open(log_file, 'w') as f:
         json.dump(history.history, f, indent=4, separators=(',', ':'))
-    
+
     pprint(history.history)
 
     if train_with_plot:
@@ -359,9 +362,11 @@ def plot_history(history, plot_file):
 
     # plt.show()
 
+
 @click.group()
 def cli():
     pass
+
 
 @click.command()
 @click.option('--plot_file', type=str, default='log')
@@ -374,8 +379,11 @@ def cli():
 @click.option('--model', default=1, help='1, 2, ...')
 @click.option('--model_name', type=str, default='cat_dog.h5')
 @click.option('--augment_data/--no-augment_data', default=False)
-def train(plot_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model, model_name, augment_data):
-    train_internal(plot_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model, model_name, augment_data)
+def train(plot_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model, model_name,
+          augment_data):
+    train_internal(plot_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model, model_name,
+                   augment_data)
+
 
 @click.command()
 @click.option('--plot_file', type=str, default='log')
@@ -387,6 +395,7 @@ def plot(plot_file):
 @click.argument('model', type=int)
 def create(model):
     create_model(model)
+
 
 cli.add_command(train)
 cli.add_command(plot)

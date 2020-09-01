@@ -2,14 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import os
-import numpy as np
 import importlib
 from io import StringIO
 from keras.models import Model, load_model
-from keras.utils import plot_model, print_summary
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QKeyEvent
-from PySide2.QtWidgets import QApplication, QWidget, QMessageBox
+from PySide2.QtWidgets import QWidget, QMessageBox
 
 from Ui_MainWidget import Ui_MainWidget
 
@@ -51,7 +49,7 @@ class MainWidget(QWidget):
         summary_string = StringIO()
         self.neuron_net.summary(print_fn=lambda x: summary_string.write(x + '\n'))
         summary = summary_string.getvalue()
-        QMessageBox.information(None, 'Model information', summary)
+        QMessageBox.information(self, 'Model information', summary)
 
     def change_model(self, index):
         self.neuron_net = load_model(self.ui.comboBoxModel.itemText(index))
@@ -74,6 +72,6 @@ class MainWidget(QWidget):
     def predict(self, image):
         assert(self.convert_func is not None)
         
-        input = self.convert_func(image)
-        output = self.neuron_net.predict(input)
-        self.ui.widgetHistogram.set_data(output)
+        input_ = self.convert_func(image)
+        output_ = self.neuron_net.predict(input_)
+        self.ui.widgetHistogram.set_data(output_)
