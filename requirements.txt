@@ -1,5 +1,5 @@
 PySide2
-keras
 tensorflow
+tensorflow-gpu
 matplotlib
 click

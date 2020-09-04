@@ -3,8 +3,9 @@
 
 import os
 import importlib
+import sys
 from io import StringIO
-from keras.models import Model, load_model
+from tensorflow.keras.models import Model, load_model
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QKeyEvent
 from PySide2.QtWidgets import QWidget, QMessageBox
@@ -26,8 +27,8 @@ class MainWidget(QWidget):
                 if f.endswith('.h5'):
                     self.ui.comboBoxModel.addItem(f)
 
-        assert(self.ui.comboBoxModel.count() > 0)
-        
+        assert (self.ui.comboBoxModel.count() > 0)
+
         self.neuron_net: Model = load_model(self.ui.comboBoxModel.itemText(0))
         self.import_converter(self.ui.comboBoxModel.itemText(0))
 
@@ -70,8 +71,14 @@ class MainWidget(QWidget):
             self.predict(image)
 
     def predict(self, image):
-        assert(self.convert_func is not None)
-        
+        assert (self.convert_func is not None)
+
         input_ = self.convert_func(image)
-        output_ = self.neuron_net.predict(input_)
-        self.ui.widgetHistogram.set_data(output_)
+        try:
+            output_ = self.neuron_net.predict(input_)
+        except Exception as e:
+            print(e)
+        except:
+            print("Unexpected error:", sys.exc_info()[0])
+        else:
+            self.ui.widgetHistogram.set_data(output_)

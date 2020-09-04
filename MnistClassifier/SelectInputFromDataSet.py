@@ -5,7 +5,7 @@
 from PySide2.QtCore import Qt, Signal
 from PySide2.QtWidgets import QWidget
 from PySide2.QtGui import QKeyEvent, QShowEvent
-from keras.datasets import mnist
+from tensorflow.keras.datasets import mnist
 import numpy as np
 
 from Ui_SelectInputFromDataSet import Ui_SelectInputFromDataSet

@@ -9,7 +9,7 @@ from PySide2.QtCore import Qt
 from PySide2.QtGui import QKeyEvent, QPixmap
 from PySide2.QtWidgets import QWidget, QFileDialog
 from Ui_MainWidget import Ui_MainWidget
-from keras.models import load_model, Model
+from tensorflow.keras.models import load_model, Model
 
 
 class MainWidget(QWidget):
