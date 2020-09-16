@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import os
 import importlib
+import os
 import sys
 from io import StringIO
-from tensorflow.keras.models import Model, load_model
+
 from PySide2.QtCore import Qt
 from PySide2.QtGui import QKeyEvent
 from PySide2.QtWidgets import QWidget, QMessageBox
+from tensorflow.keras.models import Model, load_model
 
-from Ui_MainWidget import Ui_MainWidget
+from MnistClassifier.Ui_MainWidget import Ui_MainWidget
 
 
 class MainWidget(QWidget):

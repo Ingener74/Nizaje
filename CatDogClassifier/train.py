@@ -4,33 +4,37 @@
 import json
 import os
 import shutil
-from zipfile import ZipFile
 from pprint import pprint
+from zipfile import ZipFile
+
 import click
 import matplotlib.pyplot as plt
 
+from Utils import setup_gpu_memory_growth
+
 
 def create_model(v):
-    from keras.layers import Conv2D, Dense, Flatten, MaxPooling2D, Dropout
-    from keras.models import Sequential
-    from keras.applications import VGG16
-    from keras.optimizers import RMSprop
+    from tensorflow.keras.layers import Conv2D, Dense, Flatten, MaxPooling2D, Dropout
+    from tensorflow.keras.models import Sequential
+    from tensorflow.keras.applications import VGG16
+    from tensorflow.keras.optimizers import RMSprop
 
     assert 0 < v < 6
     print(f'Selected model: {v}')
     if v == 1:
-        model = Sequential()
-        model.add(Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)))
-        model.add(MaxPooling2D((2, 2)))
-        model.add(Conv2D(64, (3, 3), activation='relu'))
-        model.add(MaxPooling2D((2, 2)))
-        model.add(Conv2D(128, (3, 3), activation='relu'))
-        model.add(MaxPooling2D((2, 2)))
-        model.add(Conv2D(128, (3, 3), activation='relu'))
-        model.add(MaxPooling2D((2, 2)))
-        model.add(Flatten())
-        model.add(Dense(512, activation='relu'))
-        model.add(Dense(1, activation='sigmoid'))
+        model = Sequential(layers=[
+            Conv2D(32, (3, 3), activation='relu', input_shape=(150, 150, 3)),
+            MaxPooling2D((2, 2)),
+            Conv2D(64, (3, 3), activation='relu'),
+            MaxPooling2D((2, 2)),
+            Conv2D(128, (3, 3), activation='relu'),
+            MaxPooling2D((2, 2)),
+            Conv2D(128, (3, 3), activation='relu'),
+            MaxPooling2D((2, 2)),
+            Flatten(),
+            Dense(512, activation='relu'),
+            Dense(1, activation='sigmoid')
+        ])
 
         model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['acc'])
 
@@ -122,71 +126,73 @@ def create_model(v):
     return model
 
 
-def train_internal(log_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model_version,
+def train_internal(log_file, train_with_plot, train_show_plot, train_size, validation_size, test_size, batch, epochs, model_version,
                    model_name, augment_data):
     from kaggle import api
-    from keras.preprocessing.image import ImageDataGenerator
+    from tensorflow.keras.preprocessing.image import ImageDataGenerator
+
+    setup_gpu_memory_growth()
 
     print(f'Train size:      {train_size}')
     print(f'Validation size: {validation_size}')
     print(f'Test size:       {test_size}')
     print(f'Batch:           {batch}')
     print(f'Epochs:          {epochs}')
-    COMPETITION = 'dogs-vs-cats'
-    DATASET_PATH = 'dataset'
-    SAMPLE_CVS = 'sampleSubmission.csv'
-    TRAIN_ZIP = 'train.zip'
-    TEST_ZIP = 'test1.zip'
+    competition: str = 'dogs-vs-cats'
+    dataset_path = 'dataset'
+    sample_cvs = 'sampleSubmission.csv'
+    train_zip = 'train.zip'
+    test_zip = 'test1.zip'
 
-    TRAIN_SET = 'train'
-    VALIDATION_SET = 'valid'
-    TEST_SET = 'test'
-    CAT = 'cat'
-    DOG = 'dog'
+    train_set = 'train'
+    validation_set = 'valid'
+    test_set = 'test'
+    cat = 'cat'
+    dog = 'dog'
 
-    LOCAL_SAMPLE_CVS = os.path.join(DATASET_PATH, SAMPLE_CVS)
-    LOCAL_TRAIN_ZIP = os.path.join(DATASET_PATH, TRAIN_ZIP)
-    LOCAL_TEST_ZIP = os.path.join(DATASET_PATH, TEST_ZIP)
+    local_sample_cvs = os.path.join(dataset_path, sample_cvs)
+    local_train_zip = os.path.join(dataset_path, train_zip)
+    local_test_zip = os.path.join(dataset_path, test_zip)
 
-    TRAIN_DIR = os.path.join(DATASET_PATH, TRAIN_ZIP[:-4])
-    TEST_DIR = os.path.join(DATASET_PATH, TEST_ZIP[:-4])
+    train_dir = os.path.join(dataset_path, train_zip[:-4])
+    test_dir = os.path.join(dataset_path, test_zip[:-4])
 
-    LOCAL_TRAIN_SET = os.path.join(TRAIN_DIR, 'train')
-    LOCAL_VALIDATION_SET = os.path.join(TRAIN_DIR, 'valid')
-    LOCAL_TEST_SET = os.path.join(TRAIN_DIR, 'test')
+    local_train_set = os.path.join(train_dir, 'train')
+    local_validation_set = os.path.join(train_dir, 'valid')
+    local_test_set = os.path.join(train_dir, 'test')
 
-    LOCAL_TRAIN_SET_CAT = os.path.join(LOCAL_TRAIN_SET, CAT)
-    LOCAL_VALIDATION_SET_CAT = os.path.join(LOCAL_VALIDATION_SET, CAT)
-    LOCAL_TEST_SET_CAT = os.path.join(LOCAL_TEST_SET, CAT)
+    local_train_set_cat = os.path.join(local_train_set, cat)
+    local_validation_set_cat = os.path.join(local_validation_set, cat)
+    local_test_set_cat = os.path.join(local_test_set, cat)
 
-    LOCAL_TRAIN_SET_DOG = os.path.join(LOCAL_TRAIN_SET, DOG)
-    LOCAL_VALIDATION_SET_DOG = os.path.join(LOCAL_VALIDATION_SET, DOG)
-    LOCAL_TEST_SET_DOG = os.path.join(LOCAL_TEST_SET, DOG)
+    local_train_set_dog = os.path.join(local_train_set, dog)
+    local_validation_set_dog = os.path.join(local_validation_set, dog)
+    local_test_set_dog = os.path.join(local_test_set, dog)
 
     print('Make dataset dir...')
-    if not os.path.exists(DATASET_PATH):
-        os.makedirs(DATASET_PATH, exist_ok=True)
+    if not os.path.exists(dataset_path):
+        os.makedirs(dataset_path, exist_ok=True)
     print('    Done')
 
     print('Kaggle api...')
     api.authenticate()
     print('    Done')
-    if not os.path.exists(LOCAL_SAMPLE_CVS):
-        api.competition_download_file(competition=COMPETITION, file_name=SAMPLE_CVS, path=DATASET_PATH)
+    if not os.path.exists(local_sample_cvs):
+        api.competition_download_file(competition=competition, file_name=sample_cvs, path=dataset_path)
     print('    Done')
     print('Download train.zip...')
-    if not os.path.exists(LOCAL_TRAIN_ZIP):
-        api.competition_download_file(competition=COMPETITION, file_name=TRAIN_ZIP, path=DATASET_PATH)
+    if not os.path.exists(local_train_zip):
+        api.competition_download_file(competition=competition, file_name=train_zip, path=dataset_path)
     print('    Done')
     print('Download test.zip...')
-    if not os.path.exists(LOCAL_TEST_ZIP):
-        api.competition_download_file(competition=COMPETITION, file_name=TEST_ZIP, path=DATASET_PATH)
+    if not os.path.exists(local_test_zip):
+        api.competition_download_file(competition=competition, file_name=test_zip, path=dataset_path)
     print('    Done')
 
     print('Extract train.zip...')
-    if not os.path.exists(TRAIN_DIR):
-        z = ZipFile(LOCAL_TRAIN_ZIP)
-        z.extractall(DATASET_PATH)
+    if not os.path.exists(train_dir):
+        z = ZipFile(local_train_zip)
+        z.extractall(dataset_path)
     print('    Done')
 
     ########################
@@ -199,22 +205,22 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
             os.makedirs(dir_name)
             print('    Done')
 
-    check_and_make_dirs(LOCAL_TRAIN_SET)
+    check_and_make_dirs(local_train_set)
 
-    if os.path.exists(LOCAL_TRAIN_SET):
-        shutil.rmtree(LOCAL_TRAIN_SET)
-    if os.path.exists(LOCAL_VALIDATION_SET):
-        shutil.rmtree(LOCAL_VALIDATION_SET)
-    if os.path.exists(LOCAL_TEST_SET):
-        shutil.rmtree(LOCAL_TEST_SET)
+    if os.path.exists(local_train_set):
+        shutil.rmtree(local_train_set)
+    if os.path.exists(local_validation_set):
+        shutil.rmtree(local_validation_set)
+    if os.path.exists(local_test_set):
+        shutil.rmtree(local_test_set)
 
-    os.makedirs(LOCAL_TRAIN_SET)
-    os.makedirs(LOCAL_TRAIN_SET_CAT)
-    os.makedirs(LOCAL_TRAIN_SET_DOG)
-    os.makedirs(LOCAL_VALIDATION_SET_CAT)
-    os.makedirs(LOCAL_VALIDATION_SET_DOG)
-    os.makedirs(LOCAL_TEST_SET_CAT)
-    os.makedirs(LOCAL_TEST_SET_DOG)
+    os.makedirs(local_train_set)
+    os.makedirs(local_train_set_cat)
+    os.makedirs(local_train_set_dog)
+    os.makedirs(local_validation_set_cat)
+    os.makedirs(local_validation_set_dog)
+    os.makedirs(local_test_set_cat)
+    os.makedirs(local_test_set_dog)
 
     m = 12500
 
@@ -233,12 +239,12 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
     print('Copy images for train')
     for i in range(0, train_set_count):
         shutil.copyfile(
-            os.path.join(TRAIN_DIR, f'cat.{c + i}.jpg'),
-            os.path.join(LOCAL_TRAIN_SET_CAT, f'cat.{c + i}.jpg')
+            os.path.join(train_dir, f'cat.{c + i}.jpg'),
+            os.path.join(local_train_set_cat, f'cat.{c + i}.jpg')
         )
         shutil.copyfile(
-            os.path.join(TRAIN_DIR, f'dog.{c + i}.jpg'),
-            os.path.join(LOCAL_TRAIN_SET_DOG, f'dog.{c + i}.jpg')
+            os.path.join(train_dir, f'dog.{c + i}.jpg'),
+            os.path.join(local_train_set_dog, f'dog.{c + i}.jpg')
         )
     print('    Done')
 
@@ -247,12 +253,12 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
     print('Copy images for validation')
     for i in range(0, valid_set_count):
         shutil.copyfile(
-            os.path.join(TRAIN_DIR, f'cat.{c + i}.jpg'),
-            os.path.join(LOCAL_VALIDATION_SET_CAT, f'cat.{c + i}.jpg')
+            os.path.join(train_dir, f'cat.{c + i}.jpg'),
+            os.path.join(local_validation_set_cat, f'cat.{c + i}.jpg')
         )
         shutil.copyfile(
-            os.path.join(TRAIN_DIR, f'dog.{i}.jpg'),
-            os.path.join(LOCAL_VALIDATION_SET_DOG, f'dog.{c + i}.jpg')
+            os.path.join(train_dir, f'dog.{i}.jpg'),
+            os.path.join(local_validation_set_dog, f'dog.{c + i}.jpg')
         )
     print('    Done')
 
@@ -261,25 +267,25 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
     print('Copy images for test')
     for i in range(0, test_set_count):
         shutil.copyfile(
-            os.path.join(TRAIN_DIR, f'cat.{c + i}.jpg'),
-            os.path.join(LOCAL_TEST_SET_CAT, f'cat.{c + i}.jpg')
+            os.path.join(train_dir, f'cat.{c + i}.jpg'),
+            os.path.join(local_test_set_cat, f'cat.{c + i}.jpg')
         )
         shutil.copyfile(
-            os.path.join(TRAIN_DIR, f'dog.{c + i}.jpg'),
-            os.path.join(LOCAL_TEST_SET_DOG, f'dog.{c + i}.jpg')
+            os.path.join(train_dir, f'dog.{c + i}.jpg'),
+            os.path.join(local_test_set_dog, f'dog.{c + i}.jpg')
         )
     print('    Done')
 
-    print('Files for Train ' + str(len(os.listdir(LOCAL_TRAIN_SET_CAT)) + len(os.listdir(LOCAL_TRAIN_SET_DOG))))
+    print('Files for Train ' + str(len(os.listdir(local_train_set_cat)) + len(os.listdir(local_train_set_dog))))
     print('Files for Validation ' + str(
-        len(os.listdir(LOCAL_VALIDATION_SET_CAT)) + len(os.listdir(LOCAL_VALIDATION_SET_DOG))))
-    print('Files for Test ' + str(len(os.listdir(LOCAL_TEST_SET_CAT)) + len(os.listdir(LOCAL_TEST_SET_DOG))))
+        len(os.listdir(local_validation_set_cat)) + len(os.listdir(local_validation_set_dog))))
+    print('Files for Test ' + str(len(os.listdir(local_test_set_cat)) + len(os.listdir(local_test_set_dog))))
 
     print('    Done')
 
-    if not os.path.exists(TEST_DIR):
-        z = ZipFile(LOCAL_TEST_ZIP)
-        z.extractall(DATASET_PATH)
+    if not os.path.exists(test_dir):
+        z = ZipFile(local_test_zip)
+        z.extractall(dataset_path)
 
     print('Create model...')
 
@@ -302,7 +308,7 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
         **augment_config
     )
     train_generator = train_data_generator.flow_from_directory(
-        LOCAL_TRAIN_SET,
+        local_train_set,
         target_size=(150, 150),
         batch_size=batch,
         class_mode='binary'
@@ -311,7 +317,7 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
     validation_data_generator = ImageDataGenerator(rescale=1. / 255)
 
     validation_generator = validation_data_generator.flow_from_directory(
-        LOCAL_VALIDATION_SET,
+        local_validation_set,
         target_size=(150, 150),
         batch_size=batch,
         class_mode='binary'
@@ -329,16 +335,23 @@ def train_internal(log_file, train_with_plot, train_size, validation_size, test_
 
     model.save(model_name)
 
+    new_history = {
+        'acc': [float(v) for v in history.history['acc']],
+        'loss': [float(v) for v in history.history['loss']],
+        'val_acc': [float(v) for v in history.history['val_acc']],
+        'val_loss': [float(v) for v in history.history['val_loss']],
+    }
+
     with open(log_file, 'w') as f:
-        json.dump(history.history, f, indent=4, separators=(',', ':'))
+        json.dump(new_history, f, indent=4)
 
     pprint(history.history)
 
     if train_with_plot:
-        plot_history(history.history, log_file)
+        plot_history(history.history, log_file, train_show_plot)
 
 
-def plot_history(history, plot_file):
+def plot_history(history, plot_file, show=False):
     acc = history['acc']
     loss = history['loss']
     val_acc = history['val_acc']
@@ -359,8 +372,8 @@ def plot_history(history, plot_file):
     plt.grid(True)
 
     plt.savefig(plot_file + '.png')
-
-    # plt.show()
+    if show:
+        plt.show()
 
 
 @click.group()
@@ -371,6 +384,7 @@ def cli():
 @click.command()
 @click.option('--plot_file', type=str, default='log')
 @click.option('--train_with_plot/--no-train_with_plot', default=False)
+@click.option('--train_show_plot/--no-train_show_plot', default=False)
 @click.option('--train_size', default=400)
 @click.option('--validation_size', default=100)
 @click.option('--test_size', default=200)
@@ -379,16 +393,35 @@ def cli():
 @click.option('--model', default=1, help='1, 2, ...')
 @click.option('--model_name', type=str, default='cat_dog.h5')
 @click.option('--augment_data/--no-augment_data', default=False)
-def train(plot_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model, model_name,
+def train(plot_file,
+          train_with_plot,
+          train_show_plot,
+          train_size,
+          validation_size,
+          test_size,
+          batch,
+          epochs,
+          model,
+          model_name,
           augment_data):
-    train_internal(plot_file, train_with_plot, train_size, validation_size, test_size, batch, epochs, model, model_name,
+    train_internal(plot_file,
+                   train_with_plot,
+                   train_show_plot,
+                   train_size,
+                   validation_size,
+                   test_size,
+                   batch,
+                   epochs,
+                   model,
+                   model_name,
                    augment_data)
 
 
 @click.command()
 @click.option('--plot_file', type=str, default='log')
-def plot(plot_file):
-    plot_history(json.load(open(plot_file)), plot_file)
+@click.option('--show_plot/--no-show_plot', default=False)
+def plot(plot_file, show_plot):
+    plot_history(json.load(open(plot_file)), plot_file, show_plot)
 
 
 @click.command()

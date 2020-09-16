@@ -37,4 +37,4 @@ class Ui_SelectInputFromDataSet(object):
         SelectInputFromDataSet.setWindowTitle(QtWidgets.QApplication.translate("SelectInputFromDataSet", "Select input from dataset", None, -1))
         self.pushButtonSet.setText(QtWidgets.QApplication.translate("SelectInputFromDataSet", "Set image", None, -1))
 
-from DataSetImageView import DataSetImageView
+from MnistClassifier.DataSetImageView import DataSetImageView

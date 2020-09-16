@@ -2,13 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import matplotlib.pyplot as plt
-from keras.datasets import mnist
-from keras.layers import Conv2D, Dense, MaxPooling2D, Flatten
-from keras.models import Sequential, load_model
-from keras.utils import to_categorical
+from tensorflow.keras.datasets import mnist
+from tensorflow.keras.layers import Conv2D, Dense, MaxPooling2D, Flatten
+from tensorflow.keras.models import Sequential, load_model
+from tensorflow.keras.utils import to_categorical
 
 
-def train_network():
+def train_dense_network():
     # Prepare dataset
     (train_images, train_labels), (test_images, test_labels) = mnist.load_data()
 
@@ -98,7 +98,7 @@ def train_conv_network():
     # Train model
     history = network.fit(train_images, train_labels, epochs=5, batch_size=64)
 
-    acc = history.history['acc']
+    acc = history.history['accuracy']
     loss = history.history['loss']
     plt.plot(range(len(acc)), acc, label='Accuracy')
     plt.plot(range(len(loss)), loss, label='Loss')
@@ -115,10 +115,9 @@ def train_conv_network():
     return network
 
 
-def load_network():
-    return load_model(MODEL_FILE)
+def load_network(filename):
+    return load_model(filename)
 
 
-# network = train_network()
-
-network = train_conv_network()
+network = train_dense_network()
+# network = train_conv_network()

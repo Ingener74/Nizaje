@@ -106,6 +106,6 @@ class Ui_MainWidget(object):
         self.pushButtonModelInfo.setText(QtWidgets.QApplication.translate("MainWidget", "Info", None, -1))
         self.groupBox_2.setTitle(QtWidgets.QApplication.translate("MainWidget", "Output", None, -1))
 
-from HistogramWidget import HistogramWidget
-from DrawInput import DrawInput
-import resources_rc
+from MnistClassifier.HistogramWidget import HistogramWidget
+from MnistClassifier.DrawInput import DrawInput
+import MnistClassifier.resources_rc

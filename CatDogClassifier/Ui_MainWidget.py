@@ -66,4 +66,4 @@ class Ui_MainWidget(object):
         self.label.setText(QtWidgets.QApplication.translate("MainWidget", "Cat", None, -1))
         self.label_2.setText(QtWidgets.QApplication.translate("MainWidget", "Dog", None, -1))
 
-import resources_rc
+import CatDogClassifier.resources_rc

@@ -4,11 +4,14 @@
 import sys
 from PySide2.QtWidgets import QApplication
 
-from MainWidget import MainWidget
+from CatDogClassifier.MainWidget import MainWidget
+from Utils import setup_gpu_memory_growth
 
 
 def main():
-    app = QApplication(sys.argv)
+    setup_gpu_memory_growth()
+
+    app = QApplication()
 
     main_widget = MainWidget()
     main_widget.show()

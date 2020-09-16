@@ -8,7 +8,7 @@ from PySide2.QtGui import QKeyEvent, QShowEvent
 from tensorflow.keras.datasets import mnist
 import numpy as np
 
-from Ui_SelectInputFromDataSet import Ui_SelectInputFromDataSet
+from MnistClassifier.Ui_SelectInputFromDataSet import Ui_SelectInputFromDataSet
 
 
 class SelectInputFromDataSet(QWidget):
