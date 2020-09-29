@@ -126,8 +126,17 @@ def create_model(v):
     return model
 
 
-def train_internal(log_file, train_with_plot, train_show_plot, train_size, validation_size, test_size, batch, epochs, model_version,
-                   model_name, augment_data):
+def train_internal(log_file,
+                   train_with_plot,
+                   train_show_plot,
+                   train_size,
+                   validation_size,
+                   test_size,
+                   batch,
+                   epochs,
+                   model_version,
+                   model_name,
+                   augment_data):
     from kaggle import api
     from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
@@ -430,9 +439,15 @@ def create(model):
     create_model(model)
 
 
+@click.command()
+def test_all():
+    pass
+
+
 cli.add_command(train)
 cli.add_command(plot)
 cli.add_command(create)
+cli.add_command(test_all)
 
 if __name__ == "__main__":
     cli()
